@@ -25,6 +25,7 @@ public class FactoryBuilding : Calculatable
 			prod.Type = "bla";
 			AvailableBatches.Add (prod);
 			prod.transform.parent = transform;
+			GameObject.Destroy (workWith.gameObject);
 		}
 		Debug.LogWarning ("Factory Building " + Name + " has " + AvailableBatches.Count + " batches");
 	}
