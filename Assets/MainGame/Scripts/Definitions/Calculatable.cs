@@ -34,7 +34,18 @@ public abstract class Calculatable : MonoBehaviour, ICalculatable
 
 	protected abstract void Pull (ICalculatable dependency);
 
-	public abstract void Process();
+	protected abstract void ProcessInternal ();
+
+	public void Process(){
+		ProcessInternal ();
+
+		IList<ICalculatable> calculatables = GetComponentsInChildren<ICalculatable> ();
+		foreach (ICalculatable calc in calculatables) {
+			if (calc == this)
+				continue;
+			calc.Process ();
+		}
+	}
 
 	public void Pull(){
 		foreach (ICalculatable dependency in Dependencies) {

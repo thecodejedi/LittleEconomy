@@ -7,7 +7,7 @@ public class ResourceBuilding : Calculatable
 	protected override void Pull(ICalculatable dependency){
 	}
 
-	public override void Process(){
+	protected override void ProcessInternal(){
 		ResourceBatch batch = CreateResourceBatch ();
 		batch.Ammount = 1;
 		batch.Type = ResourceType;

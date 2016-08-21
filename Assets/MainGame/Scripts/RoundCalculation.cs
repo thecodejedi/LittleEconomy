@@ -21,7 +21,7 @@ public class RoundCalculation : MonoBehaviour {
 			Debug.LogWarning ("Pulling " + calc.Name);
 			calc.Pull ();
 		}
-		IList<GameObject> allCalculatables = GameObject.FindGameObjectsWithTag("Calc");
+
 		foreach (GameObject go in calculatables) {
 			ICalculatable calc = go.GetComponent<ICalculatable> ();
 			Debug.LogWarning ("Processing " + calc.Name);

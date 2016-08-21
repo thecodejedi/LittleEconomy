@@ -18,7 +18,7 @@ public class FactoryBuilding : Calculatable
 		}
 	}
 
-	public override void Process(){
+	protected override void ProcessInternal(){
 		if (workWith != null) {
 			ProductBatch prod = CreateProductBatch ();
 			prod.Ammount = 1;
