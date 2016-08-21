@@ -34,6 +34,7 @@ public class TerrainManager : MonoBehaviour {
 			int zPos = rnd.Next (0, (int)z);
 			GameObject copy = GameObject.Instantiate(cityObject);
 			copy.layer = 9;
+			copy.name = "City " + i;
 			copy.transform.position = new Vector3 (xPos, 1000, zPos);
 			City city = copy.GetComponent<City> ();
 			city.cityName = i.ToString();
