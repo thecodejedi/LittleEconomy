@@ -135,7 +135,6 @@ namespace Assets.Elenesski.Camera.Utilities {
         }
 
         public void Update() {
-
             if (!Operational)
                 return;
 

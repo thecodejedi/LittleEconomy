@@ -6,6 +6,7 @@ public class MoveCamera : MonoBehaviour {
 	public int speed;
 	void Update()
 	{
+		
 		if(Input.GetKey(KeyCode.RightArrow))
 		{
 			transform.Translate(new Vector3(speed * Time.deltaTime,0,0));

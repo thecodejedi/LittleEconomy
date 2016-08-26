@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class City : MonoBehaviour {
 
 	public string cityName;
 
-	public TextMesh text;
+	public Text text;
 
 	public GameObject texture;
 
@@ -14,7 +15,7 @@ public class City : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		text = text.GetComponent<TextMesh> ();
+		text = text.GetComponent<Text> ();
 		text.text = cityName;
 		menu = cityMenuCanvas.GetComponent<CityMenu> ();
 	}

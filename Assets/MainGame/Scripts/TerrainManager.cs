@@ -33,7 +33,7 @@ public class TerrainManager : MonoBehaviour {
 			int xPos = rnd.Next (0, (int)x);
 			int zPos = rnd.Next (0, (int)z);
 			GameObject copy = GameObject.Instantiate(cityObject);
-			copy.layer = 9;
+			SetLayerRecursively (copy, 9);
 			copy.name = "City " + i;
 			copy.transform.position = new Vector3 (xPos, 1000, zPos);
 			City city = copy.GetComponent<City> ();
@@ -41,6 +41,25 @@ public class TerrainManager : MonoBehaviour {
 			AlignWithGround (city);
 		}
 
+	}
+
+	void SetLayerRecursively(GameObject obj, int newLayer)
+	{
+		if (null == obj)
+		{
+			return;
+		}
+
+		obj.layer = newLayer;
+
+		foreach (Transform child in obj.transform)
+		{
+			if (null == child)
+			{
+				continue;
+			}
+			SetLayerRecursively(child.gameObject, newLayer);
+		}
 	}
 
 	static void AlignWithGround (City city) {
