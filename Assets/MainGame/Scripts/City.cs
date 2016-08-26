@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class City : MonoBehaviour {
 
 	public string cityName;
+
+	public IList<Office> Offices = new List<Office>();
 
 	public Text text;
 

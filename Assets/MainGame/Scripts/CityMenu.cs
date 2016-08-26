@@ -22,6 +22,8 @@ public class CityMenu : MonoBehaviour {
 
 	public FactoryMenu factoryMenu;
 
+	private List<OfficeButton> officeButtons = new List<OfficeButton>();
+
 	// Use this for initialization
 	void Start () {
 		cityMenuCanvas = GetComponent<Canvas> ();
@@ -29,6 +31,7 @@ public class CityMenu : MonoBehaviour {
 		factoryMenu = factoryMenu.GetComponent<FactoryMenu> ();
 		defaultOverlay = defaultOverlay.GetComponent<Canvas> ();
 		Close ();
+		officeButtons.AddRange (GetComponentsInChildren<OfficeButton> ());
 	}
 	
 	// Update is called once per frame
@@ -62,6 +65,13 @@ public class CityMenu : MonoBehaviour {
 
 		factoryDropwDown.ClearOptions ();
 		factoryDropwDown.AddOptions (options);
+
+		for (int i = 0; i < officeButtons.Count; i++) {
+			OfficeButton button = officeButtons [i];
+			if (city.Offices.Count <= i)
+				break;
+			button.SetOffice (city.Offices [i]);
+		}
 	}
 
 	public void AddResourceBuilding(string type){

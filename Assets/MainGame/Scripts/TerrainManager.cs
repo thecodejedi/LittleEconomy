@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class TerrainManager : MonoBehaviour {
 
@@ -15,6 +16,8 @@ public class TerrainManager : MonoBehaviour {
 	public float tileSize;
 
 	public GameObject cityObject;
+
+	public GameObject officeObject;
 
 	// Use this for initialization
 	void Start () {
@@ -38,9 +41,22 @@ public class TerrainManager : MonoBehaviour {
 			copy.transform.position = new Vector3 (xPos, 1000, zPos);
 			City city = copy.GetComponent<City> ();
 			city.cityName = i.ToString();
+			city.Offices = GenerateOffices (city);
 			AlignWithGround (city);
 		}
 
+	}
+
+	IList<Office> GenerateOffices(City city){
+		IList<Office> result = new List<Office>();
+		for(int i = 0; i<12;i++){
+			GameObject officeCopy = GameObject.Instantiate(officeObject);
+			Office office = officeCopy.GetComponent<Office>();
+			office.state = "bla";
+			office.city = city;
+			result.Add(officeCopy.GetComponent<Office>());
+		}
+		return result;
 	}
 
 	void SetLayerRecursively(GameObject obj, int newLayer)
