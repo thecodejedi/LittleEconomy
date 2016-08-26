@@ -8,6 +8,8 @@ public class CityMenu : MonoBehaviour {
 
 	Canvas cityMenuCanvas;
 
+	public Canvas defaultOverlay;
+
 	public GameObject cityName;
 
 	public Dropdown factoryDropwDown;
@@ -25,6 +27,7 @@ public class CityMenu : MonoBehaviour {
 		cityMenuCanvas = GetComponent<Canvas> ();
 		factoryDropwDown = factoryDropwDown.GetComponent<Dropdown> ();
 		factoryMenu = factoryMenu.GetComponent<FactoryMenu> ();
+		defaultOverlay = defaultOverlay.GetComponent<Canvas> ();
 		Close ();
 	}
 	
@@ -35,6 +38,7 @@ public class CityMenu : MonoBehaviour {
 
 	public void Close(){
 		cityMenuCanvas.enabled = false;
+		defaultOverlay.enabled = true;
 	}
 
 	public void FactorySelected(Int32 pos){
@@ -46,6 +50,7 @@ public class CityMenu : MonoBehaviour {
 	public void Open (City city)
 	{
 		cityMenuCanvas.enabled = true;
+		defaultOverlay.enabled = false;
 		cityName.GetComponent<Text> ().text = city.cityName;
 		this.city = city;
 		factories = city.GetComponentsInChildren<FactoryBuilding> ();

@@ -6,9 +6,12 @@ public class ManageMainOverlay : MonoBehaviour {
 
 	public Canvas mainMenuCanvas;
 
+	public GameObject defaultOverlay;
+
 	// Use this for initialization
 	void Start () {
 		mainMenuCanvas = mainMenuCanvas.GetComponent<Canvas> ();
+		defaultOverlay.SetActive (true);
 		HideMenu ();
 	}
 
