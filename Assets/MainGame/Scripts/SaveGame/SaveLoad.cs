@@ -10,54 +10,96 @@ using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Threading;
 
-public class SaveLoad
+public class SaveLoad : MonoBehaviour
 {
+
+	public Canvas saveCanvas;
+
+	void Start()
+	{
+	}
+
+	private bool saving;
+	void Update()
+	{
+		saveCanvas.enabled = saving;
+	}
+
 
 	public static string currentFilePath = "SaveData.cjc";    // Edit this for different save files
 
-	// Call this to write data
-	public void Save()  // Overloaded
+
+	public void Save()
 	{
 		Save(currentFilePath);
+
 	}
+
+
 	public void Save(string filePath)
 	{
+
+		saving = true;
 		var objectsToSave = UnityEngine.Object.FindObjectsOfType<GameObject>();
 
 		SaveGame gameToStore = new SaveGame();
-		var saveDatas = objectsToSave.Select(item => CreateSaveData(item)).Where(item => item != null);
+		var saveDatas = objectsToSave.Select(item => CreatePrefab(item)).Where(item => item != null);
 
 		gameToStore.DataPoints.AddRange(saveDatas);
 
-		// serialize JSON directly to a file
-		using (StreamWriter file = File.CreateText(@"SaveData.cjc"))
+		var thread = new Thread(() =>
 		{
-			JsonSerializer serializer = new JsonSerializer();
-			serializer.Serialize(file, gameToStore);
-		}
+			
+
+			// serialize JSON directly to a file
+			using (StreamWriter file = File.CreateText(@"SaveData.cjc"))
+			{
+				var settings = new JsonSerializerSettings();
+				settings.Formatting = Formatting.Indented;
+				settings.Converters.Add(new StructConverter());
+				JsonSerializer serializer = JsonSerializer.Create(settings);
+				serializer.Serialize(file, gameToStore);
+			}
+			saving = false;
+		});
+		thread.Start();
+
+
+
+
 
 	}
 
 	private Dictionary<ISaveable, int> savedObjects = new Dictionary<ISaveable, int>();
 
-	private SaveData CreateSaveData(GameObject gameObject)
+	private SavePrefab CreatePrefab(GameObject gameObject)
 	{
-		ISaveable toBeSavedHere = gameObject.GetComponent<ISaveable>();
-		if (toBeSavedHere == null)
+		RestorePrefab restore = gameObject.GetComponent<RestorePrefab>();
+		if (restore == null)
 			return null;
 
-		SaveData saveData = CreateSaveData(toBeSavedHere);
-		return saveData;
+		var prefabSave = new SavePrefab();
+		prefabSave.TemplateName = restore.PrefabName;
+
+		ISaveable[] toBeSavedHere = gameObject.GetComponentsInChildren<ISaveable>();
+
+		var saveData = toBeSavedHere.Select(item=>CreateSaveData(item));
+		prefabSave.DataPoints.AddRange(saveData);
+		return prefabSave;
 	}
 
 	private SaveData CreateSaveData(ISaveable savable)
 	{
+		if (savedObjects.ContainsKey(savable))
+		{
+			return null;
+		}
 
 		SaveData data = new SaveData()
 		{
 			TypeName = savable.GetType().FullName,
-			TemplateName = savable.TemplateName
 		};
 
 		savedObjects.Add(savable, data.Id);
@@ -113,9 +155,31 @@ public class SaveLoad
 				id = item.Id;
 			}
 
-			saveData.Links.Add(name, id);
+			saveData.Links.Add(name, new List<int> { id });
 			return;
 		}
+
+		IEnumerable<ISaveable> savableList = value as IEnumerable<ISaveable>;
+		if (savableList != null)
+		{
+			var idList = new List<int>();
+			foreach (ISaveable savablePart in savableList)
+			{
+				int id;
+				if (!savedObjects.TryGetValue(saveableProperty, out id))
+				{
+					SaveData item = CreateSaveData(saveableProperty);
+					id = item.Id;
+					idList.Add(id);
+				}
+
+
+			}
+
+			saveData.Links.Add(name, idList);
+
+		}
+
 	}
 
 	// Call this to load from a file into "data"

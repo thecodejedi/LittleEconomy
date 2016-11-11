@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class Office : MonoBehaviour, ISaveable {
 
@@ -8,6 +9,14 @@ public class Office : MonoBehaviour, ISaveable {
 
 	[SaveGameInfo]
 	public string state;
+
+	public string TemplateName
+	{
+		get
+		{
+			return "Office";
+		}
+	}
 
 	// Use this for initialization
 	void Start () {

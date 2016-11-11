@@ -6,6 +6,8 @@ public class ManageMainOverlay : MonoBehaviour {
 
 	public Canvas mainMenuCanvas;
 
+	public Canvas saveCanvas;
+
 	public GameObject defaultOverlay;
 
 	// Use this for initialization
@@ -35,7 +37,7 @@ public class ManageMainOverlay : MonoBehaviour {
 
 	public void QuickSave()
 	{
-		var saveLoad = new SaveLoad();
+		var saveLoad = saveCanvas.GetComponent<SaveLoad>();
 		saveLoad.Save();
 	}
 }

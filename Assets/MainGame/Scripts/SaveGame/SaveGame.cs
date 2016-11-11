@@ -7,5 +7,5 @@ public class SaveGame
 	{
 	}
 
-	public List<SaveData> DataPoints = new List<SaveData>();
+	public List<SavePrefab> DataPoints = new List<SavePrefab>();
 }
