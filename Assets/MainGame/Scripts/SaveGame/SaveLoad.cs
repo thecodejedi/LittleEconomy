@@ -21,10 +21,9 @@ public class SaveLoad : MonoBehaviour
 	{
 	}
 
-	private bool saving;
 	void Update()
 	{
-		saveCanvas.enabled = saving;
+		
 	}
 
 
@@ -40,33 +39,24 @@ public class SaveLoad : MonoBehaviour
 
 	public void Save(string filePath)
 	{
-
-		saving = true;
+		saveCanvas.enabled = true;
 		var objectsToSave = UnityEngine.Object.FindObjectsOfType<GameObject>();
 
 		SaveGame gameToStore = new SaveGame();
 		var saveDatas = objectsToSave.Select(item => CreatePrefab(item)).Where(item => item != null);
 
 		gameToStore.DataPoints.AddRange(saveDatas);
-
-		var thread = new Thread(() =>
+		// serialize JSON directly to a file
+		using (StreamWriter file = File.CreateText(@"SaveData.cjc"))
 		{
-			
+			var settings = new JsonSerializerSettings();
+			settings.Formatting = Formatting.Indented;
+			settings.Converters.Add(new StructConverter());
+			JsonSerializer serializer = JsonSerializer.Create(settings);
+			serializer.Serialize(file, gameToStore);
+		}
 
-			// serialize JSON directly to a file
-			using (StreamWriter file = File.CreateText(@"SaveData.cjc"))
-			{
-				var settings = new JsonSerializerSettings();
-				settings.Formatting = Formatting.Indented;
-				settings.Converters.Add(new StructConverter());
-				JsonSerializer serializer = JsonSerializer.Create(settings);
-				serializer.Serialize(file, gameToStore);
-			}
-			saving = false;
-		});
-		thread.Start();
-
-
+		saveCanvas.enabled = false;
 
 
 
@@ -83,7 +73,7 @@ public class SaveLoad : MonoBehaviour
 		var prefabSave = new SavePrefab();
 		prefabSave.TemplateName = restore.PrefabName;
 
-		ISaveable[] toBeSavedHere = gameObject.GetComponentsInChildren<ISaveable>();
+		ISaveable[] toBeSavedHere = gameObject.GetComponents<ISaveable>();
 
 		var saveData = toBeSavedHere.Select(item=>CreateSaveData(item));
 		prefabSave.DataPoints.AddRange(saveData);

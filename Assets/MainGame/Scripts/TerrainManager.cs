@@ -15,15 +15,21 @@ public class TerrainManager : MonoBehaviour {
 	[Range(0,100)]
 	public float tileSize;
 
-	public GameObject cityObject;
-
 	public GameObject officeObject;
+
+	public GameObject cityObject;
 
 	// Use this for initialization
 	void Start () {
 		terrain = terrain.GetComponent<Terrain> ();
 		GenerateTerrain (terrain,1f);
+
+		officeObject = (GameObject)Instantiate(Resources.Load("Prefabs/Office"));
+		cityObject = (GameObject)Instantiate(Resources.Load("Prefabs/DefaultCity"));
+
 		GenerateCities ();
+
+
 	}
 
 	void GenerateCities ()
