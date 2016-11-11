@@ -9,14 +9,14 @@ using System.Runtime.Serialization;
 using System.Reflection;
 using System.Collections.Generic;
 
-public class SaveData
+public class GameObjectData
 {
 	private static int id;
 
 	public int Id { get; private set;}
 
-	public SaveData() {
-		lock(typeof(SaveData))
+	public GameObjectData() {
+		lock(typeof(GameObjectData))
 			this.Id = id++;
 		Attributes = new Dictionary<string, string>();
 		Links = new Dictionary<string, List<int>>();

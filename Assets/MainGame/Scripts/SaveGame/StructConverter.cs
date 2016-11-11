@@ -34,7 +34,6 @@ public class StructConverter : JsonConverter
 	{
 		var myObject = (Vector3)value;
 		var jObject = new JObject();
-
 		jObject.Add("X", myObject.x);
 		jObject.Add("Y", myObject.y);
 		jObject.Add("Z", myObject.z);

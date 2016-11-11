@@ -37,7 +37,7 @@ public class ManageMainOverlay : MonoBehaviour {
 
 	public void QuickSave()
 	{
-		var saveLoad = saveCanvas.GetComponent<SaveLoad>();
+		var saveLoad = saveCanvas.GetComponent<Hibernator>();
 		saveLoad.Save();
 	}
 }

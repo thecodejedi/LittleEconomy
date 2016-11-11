@@ -6,13 +6,13 @@ using System;
 
 public class City : MonoBehaviour, ISaveable {
 
-	[SaveGameInfo]
+	[SaveGameValue]
 	public string cityName;
 
-	[SaveGameInfo]
+	[SaveGameValue]
 	public IList<Office> Offices = new List<Office>();
 
-	[SaveGameInfo]
+	[SaveGameValue]
 	public Text text;
 
 	public GameObject texture;

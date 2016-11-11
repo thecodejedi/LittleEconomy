@@ -4,10 +4,10 @@ using System;
 
 public class Office : MonoBehaviour, ISaveable {
 
-	[SaveGameInfo]
+	[SaveGameValue]
 	public City city;
 
-	[SaveGameInfo]
+	[SaveGameValue]
 	public string state;
 
 	public string TemplateName
