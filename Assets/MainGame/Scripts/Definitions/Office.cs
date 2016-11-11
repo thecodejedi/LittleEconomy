@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Office : MonoBehaviour {
+public class Office : MonoBehaviour, ISaveable {
 
+	[SaveGameInfo]
 	public City city;
 
+	[SaveGameInfo]
 	public string state;
 
 	// Use this for initialization

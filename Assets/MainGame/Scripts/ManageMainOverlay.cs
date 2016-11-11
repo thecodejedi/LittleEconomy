@@ -32,4 +32,10 @@ public class ManageMainOverlay : MonoBehaviour {
 	public void ExitToDesktop(){
 		Application.Quit();
 	}
+
+	public void QuickSave()
+	{
+		var saveLoad = new SaveLoad();
+		saveLoad.Save();
+	}
 }

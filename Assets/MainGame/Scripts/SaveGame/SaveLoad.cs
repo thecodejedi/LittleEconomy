@@ -7,12 +7,10 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 using System.Runtime.Serialization;
 using System.Reflection;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
-
-// === This is the class that will be accessed from scripts ===
 public class SaveLoad
 {
 
@@ -25,12 +23,19 @@ public class SaveLoad
 	}
 	public void Save(string filePath)
 	{
-		var objectsToSave = GameObject.FindGameObjectsWithTag("saveObject");
+		var objectsToSave = UnityEngine.Object.FindObjectsOfType<GameObject>();
 
 		SaveGame gameToStore = new SaveGame();
-		var saveDatas = objectsToSave.Select(item => CreateSaveData(item));
+		var saveDatas = objectsToSave.Select(item => CreateSaveData(item)).Where(item => item != null);
 
 		gameToStore.DataPoints.AddRange(saveDatas);
+
+		// serialize JSON directly to a file
+		using (StreamWriter file = File.CreateText(@"SaveData.cjc"))
+		{
+			JsonSerializer serializer = new JsonSerializer();
+			serializer.Serialize(file, gameToStore);
+		}
 
 	}
 
@@ -39,7 +44,11 @@ public class SaveLoad
 	private SaveData CreateSaveData(GameObject gameObject)
 	{
 		ISaveable toBeSavedHere = gameObject.GetComponent<ISaveable>();
-		return CreateSaveData(toBeSavedHere);
+		if (toBeSavedHere == null)
+			return null;
+
+		SaveData saveData = CreateSaveData(toBeSavedHere);
+		return saveData;
 	}
 
 	private SaveData CreateSaveData(ISaveable savable)
@@ -70,30 +79,43 @@ public class SaveLoad
 			}
 
 			var value = info.GetValue(saveable, null);
-
-			if (value is string || value is int || value is bool)
-			{
-				saveData.Attributes.Add(info.Name, value.ToString());
-				continue;
-			}
-
-			ISaveable saveableProperty = value as ISaveable;
-
-			if (saveableProperty != null)
-			{
-				int id;
-				if (!savedObjects.TryGetValue(saveableProperty, out id))
-				{
-					SaveData item = CreateSaveData(saveableProperty);
-					id = item.Id;
-				}
-
-				saveData.Links.Add(info.Name, id);
-				continue;
-			}
+			PersistValue(saveData, info.Name, value);
 
 		}
 
+		var fieldsToSave = saveable.GetType().GetFields().Where(property => property.GetCustomAttributes(false).OfType<SaveGameInfoAttribute>().Any()).ToList();
+
+		foreach (FieldInfo info in fieldsToSave)
+		{
+			var value = info.GetValue(saveable);
+			PersistValue(saveData, info.Name, value);
+
+		}
+
+	}
+
+	private void PersistValue(SaveData saveData, string name, object value)
+	{
+		if (value is string || value is int || value is bool)
+		{
+			saveData.Attributes.Add(name, value.ToString());
+			return;
+		}
+
+		ISaveable saveableProperty = value as ISaveable;
+
+		if (saveableProperty != null)
+		{
+			int id;
+			if (!savedObjects.TryGetValue(saveableProperty, out id))
+			{
+				SaveData item = CreateSaveData(saveableProperty);
+				id = item.Id;
+			}
+
+			saveData.Links.Add(name, id);
+			return;
+		}
 	}
 
 	// Call this to load from a file into "data"

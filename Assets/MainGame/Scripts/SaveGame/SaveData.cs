@@ -18,15 +18,23 @@ public class SaveData
 	public SaveData() {
 		lock(typeof(SaveData))
 			this.Id = id++;
+		Attributes = new Dictionary<string, string>();
+		Links = new Dictionary<string, int>();
 	}
 
 	public string TypeName { get; set; }
 
 	public string TemplateName { get; set; }
 
-	public Dictionary<string, string> Attributes { get; set; } = new Dictionary<string, string>();
+	public Dictionary<string, string> Attributes { get; set; } 
 
-	public Dictionary<string, int> Links { get; set; } = new Dictionary<string, int>();
+	public Dictionary<string, int> Links { get; set; }
+
+	public Vector3 Position { get; set; }
+
+	public Vector3 Rotation { get; set; }
+
+	public Vector3 Scale { get; set; }
 
 }
 
