@@ -1,15 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
-public class Office : MonoBehaviour {
+public class Office : MonoBehaviour, ISaveable {
 
+	[SaveGameValue]
 	public City city;
 
+	[SaveGameValue]
 	public string state;
 
 	// Use this for initialization
 	void Start () {
-		city = city.GetComponent<City> ();
 	}
 	
 	// Update is called once per frame

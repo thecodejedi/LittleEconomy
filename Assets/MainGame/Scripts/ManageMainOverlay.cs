@@ -6,6 +6,8 @@ public class ManageMainOverlay : MonoBehaviour {
 
 	public Canvas mainMenuCanvas;
 
+	public Canvas saveCanvas;
+
 	public GameObject defaultOverlay;
 
 	// Use this for initialization
@@ -31,5 +33,11 @@ public class ManageMainOverlay : MonoBehaviour {
 
 	public void ExitToDesktop(){
 		Application.Quit();
+	}
+
+	public void QuickSave()
+	{
+		var saveLoad = saveCanvas.GetComponent<Hibernator>();
+		saveLoad.Save();
 	}
 }
