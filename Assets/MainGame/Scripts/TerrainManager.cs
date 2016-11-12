@@ -24,7 +24,7 @@ public class TerrainManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		terrain = terrain.GetComponent<Terrain> ();
-		GenerateTerrain (terrain,1f);
+		GenerateTerrain (terrain,tileSize);
 
 		officeObject = Resources.Load("Prefabs/Office");
 		cityObject = Resources.Load("Prefabs/DefaultCity");
@@ -114,11 +114,47 @@ public class TerrainManager : MonoBehaviour {
 		{
 			for (int k = 0; k < t.terrainData.heightmapHeight; k++)
 			{
-				hts[i, k] = Mathf.PerlinNoise(((float)i / (float)t.terrainData.heightmapWidth) * tileSize, ((float)k / (float)t.terrainData.heightmapHeight) * tileSize)/ divRange;
+				hts[i, k] = Mathf.PerlinNoise(((float)i / (float)t.terrainData.heightmapWidth) * tileSize, ((float)k / (float)t.terrainData.heightmapHeight) * tileSize)/ divRange*HM;
 			}
 		}
 		Debug.LogWarning("DivRange: " + divRange + " , " + "HTiling: " + HM);
 		t.terrainData.SetHeights(0, 0, hts);
+
+
+		Smooth();
+	}
+
+	private void Smooth()
+	{
+
+		float[,] height = terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapWidth,
+										  terrain.terrainData.heightmapHeight);
+		float k = 0.5f;
+		/* Rows, left to right */
+		for (int x = 1; x < terrain.terrainData.heightmapWidth; x++)
+			for (int z = 0; z < terrain.terrainData.heightmapHeight; z++)
+				height[x, z] = height[x - 1, z] * (1 - k) +
+						  height[x, z] * k;
+
+		/* Rows, right to left*/
+		for (int x = terrain.terrainData.heightmapWidth - 2; x < -1; x--)
+			for (int z = 0; z < terrain.terrainData.heightmapHeight; z++)
+				height[x, z] = height[x + 1, z] * (1 - k) +
+						  height[x, z] * k;
+
+		/* Columns, bottom to top */
+		for (int x = 0; x < terrain.terrainData.heightmapWidth; x++)
+			for (int z = 1; z < terrain.terrainData.heightmapHeight; z++)
+				height[x, z] = height[x, z - 1] * (1 - k) +
+						  height[x, z] * k;
+
+		/* Columns, top to bottom */
+		for (int x = 0; x < terrain.terrainData.heightmapWidth; x++)
+			for (int z = terrain.terrainData.heightmapHeight; z < -1; z--)
+				height[x, z] = height[x, z + 1] * (1 - k) +
+						  height[x, z] * k;
+
+		terrain.terrainData.SetHeights(0, 0, height);
 	}
 
 }
