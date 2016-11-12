@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class TerrainManager : MonoBehaviour {
+public class TerrainManager : MonoBehaviour, ISaveable {
 
 	public Terrain terrain;
 
@@ -20,6 +20,19 @@ public class TerrainManager : MonoBehaviour {
 	Object cityObject;
 
 	public GameObject cityMenuObject;
+
+	[SaveGameValue]
+	public float[,] heights
+	{
+		get
+		{
+			return terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapWidth,
+										  terrain.terrainData.heightmapHeight);
+		}set
+		{
+			terrain.terrainData.SetHeights(0,0, value);
+		}
+	}
 
 	// Use this for initialization
 	void Start () {

@@ -134,12 +134,7 @@ public class Hibernator : MonoBehaviour
 
 	private void PersistValue(GameObjectData saveData, string name, object value)
 	{
-		if (value is string || value is int || value is bool)
-		{
-			saveData.Attributes.Add(name, value.ToString());
-			return;
-		}
-
+		
 		ISaveable saveableProperty = value as ISaveable;
 
 		if (saveableProperty != null)
@@ -159,7 +154,13 @@ public class Hibernator : MonoBehaviour
 			}
 
 			saveData.Links.Add(name, idList);
+			return;
+		}
 
+		if (value is string || value is int || value is bool || value is float[,])
+		{
+			saveData.Attributes.Add(name, value);
+			return;
 		}
 
 	}

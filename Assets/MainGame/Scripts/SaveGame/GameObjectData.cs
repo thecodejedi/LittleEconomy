@@ -18,14 +18,14 @@ public class GameObjectData
 	public GameObjectData() {
 		lock(typeof(GameObjectData))
 			this.Id = id++;
-		Attributes = new Dictionary<string, string>();
+		Attributes = new Dictionary<string, object>();
 		Links = new Dictionary<string, List<int>>();
 	}
 
 	public string TypeName { get; set; }
 
 
-	public Dictionary<string, string> Attributes { get; set; } 
+	public Dictionary<string, object> Attributes { get; set; } 
 
 	public Dictionary<string, List<int>> Links { get; set; }
 
