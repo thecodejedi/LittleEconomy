@@ -23,7 +23,6 @@ public class OfficeButton : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-			office = office.GetComponent<Office>();
 		button = button.GetComponent<Button> ();
 		state = state.GetComponent<Text> ();
 	}

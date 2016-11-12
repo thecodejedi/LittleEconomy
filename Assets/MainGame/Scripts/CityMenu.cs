@@ -6,7 +6,7 @@ using System;
 
 public class CityMenu : MonoBehaviour {
 
-	Canvas cityMenuCanvas;
+	public Canvas cityMenuCanvas;
 
 	public Canvas defaultOverlay;
 
@@ -26,11 +26,11 @@ public class CityMenu : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		cityMenuCanvas = GetComponent<Canvas> ();
+		cityMenuCanvas = cityMenuCanvas.GetComponent<Canvas> ();
 		factoryDropwDown = factoryDropwDown.GetComponent<Dropdown> ();
 		factoryMenu = factoryMenu.GetComponent<FactoryMenu> ();
 		defaultOverlay = defaultOverlay.GetComponent<Canvas> ();
-		Close ();
+		Close();
 		officeButtons.AddRange (GetComponentsInChildren<OfficeButton> ());
 	}
 	
@@ -40,6 +40,7 @@ public class CityMenu : MonoBehaviour {
 	}
 
 	public void Close(){
+		this.enabled = false;
 		cityMenuCanvas.enabled = false;
 		defaultOverlay.enabled = true;
 	}
@@ -52,6 +53,7 @@ public class CityMenu : MonoBehaviour {
 
 	public void Open (City city)
 	{
+		this.enabled = true;
 		cityMenuCanvas.enabled = true;
 		defaultOverlay.enabled = false;
 		cityName.GetComponent<Text> ().text = city.cityName;

@@ -8,4 +8,6 @@ public class IncludeInSaveGame : MonoBehaviour
 	}
 
 	public string PrefabName;
+
+	public bool PersistPosition;
 }

@@ -12,36 +12,28 @@ public class City : MonoBehaviour, ISaveable {
 	[SaveGameValue]
 	public IList<Office> Offices = new List<Office>();
 
-	[SaveGameValue]
 	public Text text;
 
 	public GameObject texture;
 
-	public Canvas cityMenuCanvas;
+	public GameObject cityMenuObject;
 
-	CityMenu menu;
-
-	public string TemplateName
-	{
-		get
-		{
-			return "City";
-		}
-	}
+	CityMenu cityMenu;
 
 	// Use this for initialization
 	void Start () {
+		cityMenu = cityMenuObject.GetComponent<CityMenu>();
 		text = text.GetComponent<Text> ();
 		text.text = cityName;
-		menu = cityMenuCanvas.GetComponent<CityMenu> ();
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 		
 	}
+
 	void OnMouseDown() {
 		Debug.LogWarning ("City " + cityName + " clicked");
-		menu.Open (this);
+		cityMenu.Open (this);
 	}
 }

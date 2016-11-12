@@ -19,11 +19,12 @@ public class Hibernator : MonoBehaviour
 
 	void Start()
 	{
+		saveCanvas.enabled = false;
 	}
 
 	void Update()
 	{
-		
+
 	}
 
 
@@ -51,6 +52,7 @@ public class Hibernator : MonoBehaviour
 			var settings = new JsonSerializerSettings();
 			settings.Formatting = Formatting.Indented;
 			settings.Converters.Add(new StructConverter());
+			settings.DefaultValueHandling = DefaultValueHandling.Ignore;
 			JsonSerializer serializer = JsonSerializer.Create(settings);
 			serializer.Serialize(file, gameToStore);
 		}
@@ -59,7 +61,7 @@ public class Hibernator : MonoBehaviour
 
 	}
 
-	private Dictionary<ISaveable, int> savedObjects = new Dictionary<ISaveable, int>();
+	private Dictionary<ISaveable, GameObjectData> savedObjects = new Dictionary<ISaveable, GameObjectData>();
 
 	private PrefabData CreatePrefab(GameObject gameObject)
 	{
@@ -70,26 +72,33 @@ public class Hibernator : MonoBehaviour
 		var prefabSave = new PrefabData();
 		prefabSave.TemplateName = restore.PrefabName;
 
-		ISaveable[] toBeSavedHere = gameObject.GetComponents<ISaveable>();
+		if (restore.PersistPosition)
+		{
+			prefabSave.Position = gameObject.transform.position;
+			prefabSave.Rotation = gameObject.transform.position;
+		}
 
-		var saveData = toBeSavedHere.Select(item=>CreateSaveData(item));
+		ISaveable[] toBeSavedHere = gameObject.GetComponents<ISaveable>().Distinct().ToArray();
+
+		var saveData = toBeSavedHere.Select(item => CreateSaveData(item)).ToList();
 		prefabSave.GameObjects.AddRange(saveData);
 		return prefabSave;
 	}
 
 	private GameObjectData CreateSaveData(ISaveable savable)
 	{
-		if (savedObjects.ContainsKey(savable))
+		GameObjectData data;
+		if (savedObjects.TryGetValue(savable,out data))
 		{
-			return null;
+			return data;
 		}
 
-		GameObjectData data = new GameObjectData()
+		data = new GameObjectData()
 		{
 			TypeName = savable.GetType().FullName,
 		};
 
-		savedObjects.Add(savable, data.Id);
+		savedObjects.Add(savable, data);
 
 		FillSaveData(savable, data);
 
@@ -135,14 +144,8 @@ public class Hibernator : MonoBehaviour
 
 		if (saveableProperty != null)
 		{
-			int id;
-			if (!savedObjects.TryGetValue(saveableProperty, out id))
-			{
-				GameObjectData item = CreateSaveData(saveableProperty);
-				id = item.Id;
-			}
-
-			saveData.Links.Add(name, new List<int> { id });
+			GameObjectData item = CreateSaveData(saveableProperty);
+			saveData.Links.Add(name, new List<int> { item.Id });
 			return;
 		}
 
@@ -150,17 +153,9 @@ public class Hibernator : MonoBehaviour
 		if (savableList != null)
 		{
 			var idList = new List<int>();
-			foreach (ISaveable savablePart in savableList)
-			{
-				int id;
-				if (!savedObjects.TryGetValue(saveableProperty, out id))
-				{
-					GameObjectData item = CreateSaveData(saveableProperty);
-					id = item.Id;
-					idList.Add(id);
-				}
-
-
+			foreach (ISaveable savablePart in savableList) {
+				GameObjectData item = CreateSaveData(saveableProperty);
+				idList.Add(item.Id);
 			}
 
 			saveData.Links.Add(name, idList);
@@ -176,7 +171,7 @@ public class Hibernator : MonoBehaviour
 		GameObjectData data = new GameObjectData();
 		Stream stream = File.Open(filePath, FileMode.Open);
 		BinaryFormatter bformatter = new BinaryFormatter();
-		bformatter.Binder = new VersionDeserializationBinder();
+
 		data = (GameObjectData)bformatter.Deserialize(stream);
 		stream.Close();
 

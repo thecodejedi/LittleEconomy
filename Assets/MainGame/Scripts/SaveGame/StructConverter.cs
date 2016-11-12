@@ -12,6 +12,7 @@ public class StructConverter : JsonConverter
 		return objectType.IsAssignableFrom(typeof(Vector3));
 	}
 
+
 	public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
 	{
 

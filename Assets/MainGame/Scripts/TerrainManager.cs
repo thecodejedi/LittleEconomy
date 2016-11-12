@@ -15,17 +15,19 @@ public class TerrainManager : MonoBehaviour {
 	[Range(0,100)]
 	public float tileSize;
 
-	public GameObject officeObject;
+	Object officeObject;
 
-	public GameObject cityObject;
+	Object cityObject;
+
+	public GameObject cityMenuObject;
 
 	// Use this for initialization
 	void Start () {
 		terrain = terrain.GetComponent<Terrain> ();
 		GenerateTerrain (terrain,1f);
 
-		officeObject = (GameObject)Instantiate(Resources.Load("Prefabs/Office"));
-		cityObject = (GameObject)Instantiate(Resources.Load("Prefabs/DefaultCity"));
+		officeObject = Resources.Load("Prefabs/Office");
+		cityObject = Resources.Load("Prefabs/DefaultCity");
 
 		GenerateCities ();
 
@@ -41,12 +43,12 @@ public class TerrainManager : MonoBehaviour {
 		for (int i = 0; i < 1000; i++) {
 			int xPos = rnd.Next (0, (int)x);
 			int zPos = rnd.Next (0, (int)z);
-			GameObject copy = GameObject.Instantiate(cityObject);
+			GameObject copy = (GameObject)GameObject.Instantiate(cityObject,new Vector3(xPos, 1000, zPos),Quaternion.identity);
 			SetLayerRecursively (copy, 9);
 			copy.name = "City " + i;
-			copy.transform.position = new Vector3 (xPos, 1000, zPos);
 			City city = copy.GetComponent<City> ();
 			city.cityName = i.ToString();
+			city.cityMenuObject = cityMenuObject;
 			city.Offices = GenerateOffices (city);
 			AlignWithGround (city);
 		}
@@ -56,7 +58,7 @@ public class TerrainManager : MonoBehaviour {
 	IList<Office> GenerateOffices(City city){
 		IList<Office> result = new List<Office>();
 		for(int i = 0; i<12;i++){
-			GameObject officeCopy = GameObject.Instantiate(officeObject);
+			GameObject officeCopy =(GameObject)GameObject.Instantiate(officeObject, Vector3.zero, Quaternion.identity);
 			Office office = officeCopy.GetComponent<Office>();
 			office.state = "bla";
 			office.city = city;
