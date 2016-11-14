@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class TerrainManager : MonoBehaviour, ISaveable
+public class TerrainManager : MonoBehaviour
 {
 
 	Terrain terrain;
@@ -19,20 +19,6 @@ public class TerrainManager : MonoBehaviour, ISaveable
 	Object officeObject;
 
 	Object cityObject;
-
-	[SaveGameValue]
-	public float[,] heights
-	{
-		get
-		{
-			return terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapWidth,
-										  terrain.terrainData.heightmapHeight);
-		}
-		set
-		{
-			terrain.terrainData.SetHeights(0, 0, value);
-		}
-	}
 
 	void Awake()
 	{

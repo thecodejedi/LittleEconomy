@@ -168,20 +168,6 @@ public class Hibernator : MonoBehaviour
 			return;
 		}
 
-		IEnumerable<ISaveable> savableList = value as IEnumerable<ISaveable>;
-		if (savableList != null)
-		{
-			var idList = new List<int>();
-			foreach (ISaveable savablePart in savableList)
-			{
-				GameObjectData item = CreateSaveData(saveableProperty);
-				idList.Add(item.Id);
-			}
-
-			saveData.Links.Add(name, idList);
-			return;
-		}
-
 		if (value is string || value is int || value is bool)
 		{
 			saveData.Attributes.Add(name, value);
@@ -191,6 +177,23 @@ public class Hibernator : MonoBehaviour
 		if (value is float[,])
 		{
 			saveData.Floats.Add(name, (float[,])value);
+			return;
+		}
+
+		IEnumerable savableList = value as IEnumerable;
+		if (savableList != null)
+		{
+			var idList = new List<int>();
+			foreach (object savablePart in savableList)
+			{
+				ISaveable svbl = savablePart as ISaveable;
+				if (svbl == null)
+					continue;
+				GameObjectData item = CreateSaveData(svbl);
+				idList.Add(item.Id);
+			}
+
+			saveData.Links.Add(name, idList);
 			return;
 		}
 
@@ -257,7 +260,7 @@ public class Hibernator : MonoBehaviour
 
 	private void SetLink(Component comp, string linkName, List<int> links)
 	{
-		var propertiesToSave = comp.GetType().GetProperties().Where(property => property.Name == linkName&&property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
+		var propertiesToSave = comp.GetType().GetProperties().Where(property => property.Name == linkName && property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
 
 		foreach (PropertyInfo info in propertiesToSave)
 		{
@@ -277,14 +280,14 @@ public class Hibernator : MonoBehaviour
 
 		}
 
-		var fieldsToSave = comp.GetType().GetFields().Where(property =>property.Name==linkName && property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
+		var fieldsToSave = comp.GetType().GetFields().Where(property => property.Name == linkName && property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
 
 		foreach (FieldInfo info in fieldsToSave)
 		{
-			if (typeof(IList).IsAssignableFrom(info.FieldType))
-			{
-				IList list = info.GetValue(comp) as IList;
 
+			IList list = info.GetValue(comp) as IList;
+			if (list != null)
+			{
 				foreach (var loadedObj in links.Select(id => loadedObjects[id]))
 				{
 					list.Add(loadedObj);
