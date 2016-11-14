@@ -32,3 +32,4 @@ sysinfo.txt
 packages/*
 Assets/packages/*
 SaveData.cjc
+*.les

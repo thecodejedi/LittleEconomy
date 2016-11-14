@@ -15,11 +15,10 @@ using System.Threading;
 public class Hibernator : MonoBehaviour
 {
 
-	public Canvas saveCanvas;
+	public GameObject saveing;
 
 	void Start()
 	{
-		saveCanvas.enabled = false;
 	}
 
 	void Update()
@@ -28,18 +27,28 @@ public class Hibernator : MonoBehaviour
 	}
 
 
-	public static string currentFilePath = "SaveData.cjc";    // Edit this for different save files
+	public static string currentFilePath = "QuickSaveGame.les";    // Edit this for different save files
+
+	public IEnumerable<string> LoadSaveGames()
+	{
+		return Directory.GetFiles(Directory.GetCurrentDirectory(),"*.les");
+	}
 
 
-	public void Save()
+	public void QuickSave()
 	{
 		Save(currentFilePath);
 	}
 
-
 	public void Save(string filePath)
 	{
-		saveCanvas.enabled = true;
+		saveing.SetActive(true);
+		DoSave(filePath);
+		saveing.SetActive(false);
+	}
+
+	private void DoSave(string filePath)
+	{
 		var objectsToSave = UnityEngine.Object.FindObjectsOfType<GameObject>();
 
 		SaveGame gameToStore = new SaveGame();
@@ -47,7 +56,7 @@ public class Hibernator : MonoBehaviour
 
 		gameToStore.Prefabs.AddRange(saveDatas);
 		// serialize JSON directly to a file
-		using (StreamWriter file = File.CreateText(@"SaveData.cjc"))
+		using (StreamWriter file = File.CreateText(filePath))
 		{
 			var settings = new JsonSerializerSettings();
 			settings.Formatting = Formatting.Indented;
@@ -57,7 +66,7 @@ public class Hibernator : MonoBehaviour
 			serializer.Serialize(file, gameToStore);
 		}
 
-		saveCanvas.enabled = false;
+		currentFilePath = filePath;
 
 	}
 

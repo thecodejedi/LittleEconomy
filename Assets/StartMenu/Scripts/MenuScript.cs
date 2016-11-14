@@ -7,6 +7,7 @@ public class MenuScript : MonoBehaviour {
 
 	public Button exitButton;
 	public Button startButton;
+	public GameConfiguration gameConfig;
 
 	// Use this for initialization
 	void Start () {
@@ -19,6 +20,7 @@ public class MenuScript : MonoBehaviour {
 	}
 
 	public void StartPress(){
+		DontDestroyOnLoad(gameConfig);
 		SceneManager.LoadScene ("MainGame");
 	}
 }
