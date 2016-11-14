@@ -34,20 +34,27 @@ public class TerrainManager : MonoBehaviour, ISaveable {
 		}
 	}
 
-	// Use this for initialization
-	void Start () {
-		terrain = terrain.GetComponent<Terrain> ();
-		GenerateTerrain (terrain,tileSize);
-
+	void Awake()
+	{
 		officeObject = Resources.Load("Prefabs/Office");
 		cityObject = Resources.Load("Prefabs/DefaultCity");
-
-		GenerateCities ();
-
+	}
+	// Use this for initialization
+	void Start () {
 
 	}
 
-	void GenerateCities ()
+	public void LoadTerrain(float[,] hts)
+	{
+		terrain.terrainData.SetHeights(0, 0, hts);
+	}
+
+	public void CreateNewTerrain()
+	{
+		GenerateTerrain(terrain, tileSize);
+	}
+
+	public void GenerateCities ()
 	{
 		float x = terrain.terrainData.size.x;
 		float z = terrain.terrainData.size.z;
