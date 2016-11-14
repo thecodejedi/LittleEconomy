@@ -61,6 +61,8 @@ public class PrefabData
 
 	public string TemplateName { get; set; }
 
+	public string Name { get; set; }
+
 	public PrefabData()
 	{
 	}

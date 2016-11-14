@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class TerrainManager : MonoBehaviour, ISaveable
 {
 
-	public Terrain terrain;
+	Terrain terrain;
 
 	[Range(1, 10)]
 	public float HM;
@@ -19,8 +19,6 @@ public class TerrainManager : MonoBehaviour, ISaveable
 	Object officeObject;
 
 	Object cityObject;
-
-	public GameObject cityMenuObject;
 
 	[SaveGameValue]
 	public float[,] heights
@@ -47,13 +45,9 @@ public class TerrainManager : MonoBehaviour, ISaveable
 
 	}
 
-	public void LoadTerrain(float[,] hts)
-	{
-		terrain.terrainData.SetHeights(0, 0, hts);
-	}
-
 	public void CreateNewTerrain()
 	{
+		terrain = ((GameObject)GameObject.Instantiate(Resources.Load("Prefabs/Terrain"), Vector3.zero, Quaternion.identity)).GetComponent<Terrain>();
 		GenerateTerrain(terrain, tileSize);
 	}
 
@@ -112,7 +106,6 @@ public class TerrainManager : MonoBehaviour, ISaveable
 
 	static void AlignWithGround(City city)
 	{
-		GameObject obj = city.texture;
 
 		Transform myTransform = city.transform;
 

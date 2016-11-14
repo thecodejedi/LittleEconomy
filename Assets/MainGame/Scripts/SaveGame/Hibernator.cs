@@ -93,6 +93,7 @@ public class Hibernator : MonoBehaviour
 
 		var prefabSave = new PrefabData();
 		prefabSave.TemplateName = restore.PrefabName;
+		prefabSave.Name = restore.name;
 
 		if (restore.PersistPosition)
 		{
@@ -116,7 +117,7 @@ public class Hibernator : MonoBehaviour
 			return data;
 		}
 
-		data = new GameObjectData()
+		data = new GameObjectData(true)
 		{
 			TypeName = savable.GetType().FullName,
 		};
@@ -227,6 +228,7 @@ public class Hibernator : MonoBehaviour
 
 			GameObject fromPrefab = (GameObject)GameObject.Instantiate(prefab, pos, rotation);
 			fromPrefab.transform.localScale = scale;
+			fromPrefab.name = hPrefab.Name;
 
 			foreach (var go in hPrefab.GameObjects)
 			{
@@ -247,6 +249,7 @@ public class Hibernator : MonoBehaviour
 			{
 				string linkName = link.Key;
 				List<int> links = link.Value;
+				SetLink(comp, linkName, links);
 			}
 		}
 
@@ -254,7 +257,7 @@ public class Hibernator : MonoBehaviour
 
 	private void SetLink(Component comp, string linkName, List<int> links)
 	{
-		var propertiesToSave = comp.GetType().GetProperties().Where(property => property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
+		var propertiesToSave = comp.GetType().GetProperties().Where(property => property.Name == linkName&&property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
 
 		foreach (PropertyInfo info in propertiesToSave)
 		{
@@ -274,7 +277,7 @@ public class Hibernator : MonoBehaviour
 
 		}
 
-		var fieldsToSave = comp.GetType().GetFields().Where(property => property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
+		var fieldsToSave = comp.GetType().GetFields().Where(property =>property.Name==linkName && property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
 
 		foreach (FieldInfo info in fieldsToSave)
 		{

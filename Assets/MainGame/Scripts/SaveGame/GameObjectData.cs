@@ -11,13 +11,17 @@ using System.Collections.Generic;
 
 public class GameObjectData
 {
-	private static int id;
+	private static int id = 1;
 
-	public int Id { get; private set;}
+	public int Id { get; set;}
+
+	public GameObjectData(bool forSave) :this()
+	{
+		lock (typeof(GameObjectData))
+			this.Id = id++;
+	}
 
 	public GameObjectData() {
-		lock(typeof(GameObjectData))
-			this.Id = id++;
 		Attributes = new Dictionary<string, object>();
 		Floats = new Dictionary<string, float[,]>();
 		Links = new Dictionary<string, List<int>>();
@@ -25,6 +29,7 @@ public class GameObjectData
 
 	public string TypeName { get; set; }
 
+	public string Name { get; set; }
 
 	public Dictionary<string, object> Attributes { get; set; } 
 
