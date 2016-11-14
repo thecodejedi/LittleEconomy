@@ -2,17 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class TerrainManager : MonoBehaviour, ISaveable {
+public class TerrainManager : MonoBehaviour, ISaveable
+{
 
 	public Terrain terrain;
 
-	[Range(1,10)]
-	public float HM ;
+	[Range(1, 10)]
+	public float HM;
 
-	[Range(1,100)]
+	[Range(1, 100)]
 	public float divRange;
 
-	[Range(0,100)]
+	[Range(0, 100)]
 	public float tileSize;
 
 	Object officeObject;
@@ -28,9 +29,10 @@ public class TerrainManager : MonoBehaviour, ISaveable {
 		{
 			return terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapWidth,
 										  terrain.terrainData.heightmapHeight);
-		}set
+		}
+		set
 		{
-			terrain.terrainData.SetHeights(0,0, value);
+			terrain.terrainData.SetHeights(0, 0, value);
 		}
 	}
 
@@ -40,7 +42,8 @@ public class TerrainManager : MonoBehaviour, ISaveable {
 		cityObject = Resources.Load("Prefabs/DefaultCity");
 	}
 	// Use this for initialization
-	void Start () {
+	void Start()
+	{
 
 	}
 
@@ -54,29 +57,32 @@ public class TerrainManager : MonoBehaviour, ISaveable {
 		GenerateTerrain(terrain, tileSize);
 	}
 
-	public void GenerateCities ()
+	public void GenerateCities()
 	{
 		float x = terrain.terrainData.size.x;
 		float z = terrain.terrainData.size.z;
-		System.Random rnd = new System.Random ();
-		Debug.LogWarning("TerrainSize: x" + x +"z:" + z);
-		for (int i = 0; i < 1000; i++) {
-			int xPos = rnd.Next (0, (int)x);
-			int zPos = rnd.Next (0, (int)z);
-			GameObject copy = (GameObject)GameObject.Instantiate(cityObject,new Vector3(xPos, 1000, zPos),Quaternion.identity);
+		System.Random rnd = new System.Random();
+		Debug.LogWarning("TerrainSize: x" + x + "z:" + z);
+		for (int i = 0; i < 1000; i++)
+		{
+			int xPos = rnd.Next(0, (int)x);
+			int zPos = rnd.Next(0, (int)z);
+			GameObject copy = (GameObject)GameObject.Instantiate(cityObject, new Vector3(xPos, 1000, zPos), Quaternion.identity);
 			copy.name = "City " + i;
-			City city = copy.GetComponent<City> ();
+			City city = copy.GetComponent<City>();
 			city.cityName = i.ToString();
-			city.Offices = GenerateOffices (city);
-			AlignWithGround (city);
+			city.Offices = GenerateOffices(city);
+			AlignWithGround(city);
 		}
 
 	}
 
-	IList<Office> GenerateOffices(City city){
+	IList<Office> GenerateOffices(City city)
+	{
 		IList<Office> result = new List<Office>();
-		for(int i = 0; i<12;i++){
-			GameObject officeCopy =(GameObject)GameObject.Instantiate(officeObject, Vector3.zero, Quaternion.identity);
+		for (int i = 0; i < 12; i++)
+		{
+			GameObject officeCopy = (GameObject)GameObject.Instantiate(officeObject, Vector3.zero, Quaternion.identity);
 			Office office = officeCopy.GetComponent<Office>();
 			office.state = "bla";
 			office.city = city;
@@ -104,20 +110,24 @@ public class TerrainManager : MonoBehaviour, ISaveable {
 		}
 	}
 
-	static void AlignWithGround (City city) {
+	static void AlignWithGround(City city)
+	{
 		GameObject obj = city.texture;
 
-		Transform myTransform = obj.transform;
+		Transform myTransform = city.transform;
 
-			RaycastHit hit;
-			if (Physics.Raycast (myTransform.position, -Vector3.up, out hit)) {
-				Vector3 targetPosition = hit.point;
-				if (myTransform.gameObject.GetComponent<MeshFilter>() != null) {
-					Bounds bounds = myTransform.gameObject.GetComponent<MeshFilter>().sharedMesh.bounds;
-					targetPosition.y += bounds.extents.y;
-				}
-				myTransform.position = targetPosition;
-				Vector3 targetRotation = new Vector3 (hit.normal.x, myTransform.eulerAngles.y, hit.normal.z);
+		RaycastHit hit;
+		if (Physics.Raycast(myTransform.position, Vector3.down, out hit,2000,1))
+		{
+			Vector3 targetPosition = hit.point;
+			MeshFilter filter = myTransform.gameObject.GetComponentInChildren<MeshFilter>();
+			if (filter != null)
+			{
+				Bounds bounds = filter.sharedMesh.bounds;
+				targetPosition.y += bounds.extents.y;
+			}
+			myTransform.position = targetPosition;
+			Vector3 targetRotation = new Vector3(hit.normal.x, myTransform.eulerAngles.y, hit.normal.z);
 			myTransform.eulerAngles = targetRotation;
 		}
 	}
@@ -132,7 +142,7 @@ public class TerrainManager : MonoBehaviour, ISaveable {
 		{
 			for (int k = 0; k < t.terrainData.heightmapHeight; k++)
 			{
-				hts[i, k] = Mathf.PerlinNoise(((float)i / (float)t.terrainData.heightmapWidth) * tileSize, ((float)k / (float)t.terrainData.heightmapHeight) * tileSize)/ divRange*HM;
+				hts[i, k] = Mathf.PerlinNoise(((float)i / (float)t.terrainData.heightmapWidth) * tileSize, ((float)k / (float)t.terrainData.heightmapHeight) * tileSize) / divRange * HM;
 			}
 		}
 		Debug.LogWarning("DivRange: " + divRange + " , " + "HTiling: " + HM);
