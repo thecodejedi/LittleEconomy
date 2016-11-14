@@ -11,6 +11,8 @@ using System.Linq;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Threading;
+using System.Collections;
+using Newtonsoft.Json.Linq;
 
 public class Hibernator : MonoBehaviour
 {
@@ -31,7 +33,7 @@ public class Hibernator : MonoBehaviour
 
 	public IEnumerable<string> LoadSaveGames()
 	{
-		return Directory.GetFiles(Directory.GetCurrentDirectory(),"*.les");
+		return Directory.GetFiles(Directory.GetCurrentDirectory(), "*.les");
 	}
 
 
@@ -49,6 +51,7 @@ public class Hibernator : MonoBehaviour
 
 	private void DoSave(string filePath)
 	{
+		savedObjects = new Dictionary<ISaveable, GameObjectData>();
 		var objectsToSave = UnityEngine.Object.FindObjectsOfType<GameObject>();
 
 		SaveGame gameToStore = new SaveGame();
@@ -58,11 +61,8 @@ public class Hibernator : MonoBehaviour
 		// serialize JSON directly to a file
 		using (StreamWriter file = File.CreateText(filePath))
 		{
-			var settings = new JsonSerializerSettings();
-			settings.Formatting = Formatting.Indented;
-			settings.Converters.Add(new StructConverter());
-			settings.DefaultValueHandling = DefaultValueHandling.Ignore;
-			JsonSerializer serializer = JsonSerializer.Create(settings);
+
+			JsonSerializer serializer = JsonSerializer.Create(SerializerSettings);
 			serializer.Serialize(file, gameToStore);
 		}
 
@@ -70,7 +70,20 @@ public class Hibernator : MonoBehaviour
 
 	}
 
+	private JsonSerializerSettings SerializerSettings
+	{
+		get
+		{
+			var settings = new JsonSerializerSettings();
+			settings.Formatting = Formatting.Indented;
+			settings.DefaultValueHandling = DefaultValueHandling.Ignore;
+			return settings;
+		}
+	}
+
 	private Dictionary<ISaveable, GameObjectData> savedObjects = new Dictionary<ISaveable, GameObjectData>();
+
+	private Dictionary<int, object> loadedObjects = new Dictionary<int, object>();
 
 	private PrefabData CreatePrefab(GameObject gameObject)
 	{
@@ -83,8 +96,9 @@ public class Hibernator : MonoBehaviour
 
 		if (restore.PersistPosition)
 		{
-			prefabSave.Position = gameObject.transform.position;
-			prefabSave.Rotation = gameObject.transform.position;
+			prefabSave.Position = new PersistVector3(gameObject.transform.position);
+			prefabSave.Rotation = new PersistQuaternion(gameObject.transform.rotation);
+			prefabSave.Scale = new PersistVector3(gameObject.transform.localScale);
 		}
 
 		ISaveable[] toBeSavedHere = gameObject.GetComponents<ISaveable>().Distinct().ToArray();
@@ -97,7 +111,7 @@ public class Hibernator : MonoBehaviour
 	private GameObjectData CreateSaveData(ISaveable savable)
 	{
 		GameObjectData data;
-		if (savedObjects.TryGetValue(savable,out data))
+		if (savedObjects.TryGetValue(savable, out data))
 		{
 			return data;
 		}
@@ -143,7 +157,7 @@ public class Hibernator : MonoBehaviour
 
 	private void PersistValue(GameObjectData saveData, string name, object value)
 	{
-		
+
 		ISaveable saveableProperty = value as ISaveable;
 
 		if (saveableProperty != null)
@@ -157,7 +171,8 @@ public class Hibernator : MonoBehaviour
 		if (savableList != null)
 		{
 			var idList = new List<int>();
-			foreach (ISaveable savablePart in savableList) {
+			foreach (ISaveable savablePart in savableList)
+			{
 				GameObjectData item = CreateSaveData(saveableProperty);
 				idList.Add(item.Id);
 			}
@@ -166,26 +181,166 @@ public class Hibernator : MonoBehaviour
 			return;
 		}
 
-		if (value is string || value is int || value is bool || value is float[,])
+		if (value is string || value is int || value is bool)
 		{
 			saveData.Attributes.Add(name, value);
 			return;
 		}
 
+		if (value is float[,])
+		{
+			saveData.Floats.Add(name, (float[,])value);
+			return;
+		}
+
 	}
 
-	// Call this to load from a file into "data"
-	public static void Load() { Load(currentFilePath); }   // Overloaded
-	public static void Load(string filePath)
+	public void Load(string filePath)
 	{
-		GameObjectData data = new GameObjectData();
-		Stream stream = File.Open(filePath, FileMode.Open);
-		BinaryFormatter bformatter = new BinaryFormatter();
+		loadedObjects = new Dictionary<int, object>();
 
-		data = (GameObjectData)bformatter.Deserialize(stream);
-		stream.Close();
+		SaveGame saveGame;
+		using (StreamReader file = File.OpenText(filePath))
+		{
+			JsonSerializer serializer = JsonSerializer.Create(SerializerSettings);
+			saveGame = (SaveGame)serializer.Deserialize(file, typeof(SaveGame));
+		}
 
-		// Now use "data" to access your Values
+
+		Dictionary<Component, Dictionary<string, List<int>>> missingLinks = new Dictionary<Component, Dictionary<string, List<int>>>();
+
+		foreach (PrefabData hPrefab in saveGame.Prefabs)
+		{
+			var prefab = Resources.Load("Prefabs/" + hPrefab.TemplateName);
+			if (prefab == null)
+				continue;
+
+			Vector3 pos = Vector3.zero;
+			Vector3 scale = Vector3.zero;
+			Quaternion rotation = Quaternion.identity;
+			if (hPrefab.Position != null)
+			{
+				pos = hPrefab.Position.ToVector3();
+				rotation = hPrefab.Rotation.ToQuaternion();
+				scale = hPrefab.Scale.ToVector3();
+			}
+
+			GameObject fromPrefab = (GameObject)GameObject.Instantiate(prefab, pos, rotation);
+			fromPrefab.transform.localScale = scale;
+
+			foreach (var go in hPrefab.GameObjects)
+			{
+				var component = fromPrefab.GetComponent(Type.GetType(go.TypeName));
+				LoadAttributes<object>(component, go.Attributes);
+				LoadAttributes<float[,]>(component, go.Floats);
+
+				loadedObjects.Add(go.Id, component);
+				missingLinks.Add(component, go.Links);
+			}
+
+		}
+		foreach (var compRef in missingLinks)
+		{
+			Component comp = compRef.Key;
+			Dictionary<string, List<int>> linksToSet = compRef.Value;
+			foreach (var link in linksToSet)
+			{
+				string linkName = link.Key;
+				List<int> links = link.Value;
+			}
+		}
+
 	}
+
+	private void SetLink(Component comp, string linkName, List<int> links)
+	{
+		var propertiesToSave = comp.GetType().GetProperties().Where(property => property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
+
+		foreach (PropertyInfo info in propertiesToSave)
+		{
+			if (typeof(IList).IsAssignableFrom(info.PropertyType))
+			{
+				IList list = info.GetValue(comp, null) as IList;
+
+				foreach (var loadedObj in links.Select(id => loadedObjects[id]))
+				{
+					list.Add(loadedObj);
+				}
+			}
+			else {
+				var val = links.Select(id => loadedObjects[id]).FirstOrDefault();
+				info.SetValue(comp, val, null);
+			}
+
+		}
+
+		var fieldsToSave = comp.GetType().GetFields().Where(property => property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
+
+		foreach (FieldInfo info in fieldsToSave)
+		{
+			if (typeof(IList).IsAssignableFrom(info.FieldType))
+			{
+				IList list = info.GetValue(comp) as IList;
+
+				foreach (var loadedObj in links.Select(id => loadedObjects[id]))
+				{
+					list.Add(loadedObj);
+				}
+			}
+			else {
+				var val = links.Select(id => loadedObjects[id]).FirstOrDefault();
+				info.SetValue(comp, val);
+			}
+
+		}
+	}
+
+
+	private void LoadAttributes<T>(Component comp, Dictionary<string, T> attributes)
+	{
+		var propertiesToSave = comp.GetType().GetProperties().Where(property => property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
+
+		foreach (PropertyInfo info in propertiesToSave)
+		{
+			if (!info.CanWrite)
+			{
+				continue;
+			}
+			T val;
+			if (attributes.TryGetValue(info.Name, out val))
+			{
+				try
+				{
+					info.SetValue(comp, val, null);
+				}
+				catch
+				{
+					Debug.LogError("Can not load :" + info.Name + " of type " + val.GetType().FullName);
+				}
+			}
+
+
+		}
+
+		var fieldsToSave = comp.GetType().GetFields().Where(property => property.GetCustomAttributes(false).OfType<SaveGameValueAttribute>().Any()).ToList();
+
+		foreach (FieldInfo info in fieldsToSave)
+		{
+			T val;
+			if (attributes.TryGetValue(info.Name, out val))
+			{
+				try
+				{
+					info.SetValue(comp, val);
+				}
+				catch
+				{
+					Debug.LogError("Can not load :" + info.Name + " of type " + val.GetType().FullName);
+				}
+			}
+
+		}
+	}
+
 
 }

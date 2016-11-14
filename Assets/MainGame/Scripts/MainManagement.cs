@@ -7,6 +7,8 @@ public class MainManagement : MonoBehaviour
 
 	public TerrainManager terrainManager;
 
+	public Hibernator hibernator;
+
 	// Use this for initialization
 	void Start()
 	{
@@ -19,13 +21,22 @@ public class MainManagement : MonoBehaviour
 			GameObject config = new GameObject("GameConfiguration");
 			config.tag = "GameConfig";
 			config.AddComponent(typeof(GameConfiguration));
-
-			terrainManager.CreateNewTerrain();
-			terrainManager.GenerateCities();
+			configuration = config.GetComponent<GameConfiguration>();
 		}
 
+		if (string.IsNullOrEmpty(configuration.saveGame))
+		{
+			GenerateNewMap(configuration);
+		}
+		else {
+			hibernator.Load(configuration.saveGame);
+		}
+	}
 
-
+	void GenerateNewMap(GameConfiguration config)
+	{
+		terrainManager.CreateNewTerrain();
+		terrainManager.GenerateCities();
 	}
 
 	// Update is called once per frame

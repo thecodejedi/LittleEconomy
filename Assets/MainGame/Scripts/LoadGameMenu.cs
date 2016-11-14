@@ -8,6 +8,8 @@ public class LoadGameMenu : MonoBehaviour {
 
 	public Canvas gameOverlay;
 
+	public MainManagement mainManagement;
+
 	// Use this for initialization
 	void Start () {
 		
@@ -31,6 +33,8 @@ public class LoadGameMenu : MonoBehaviour {
 
 	public void LoadGame()
 	{
+		mainManagement.configuration.saveGame = Hibernator.currentFilePath;
+		DontDestroyOnLoad(mainManagement.configuration);
 		SceneManager.LoadScene("MainGame");
 	}
 }

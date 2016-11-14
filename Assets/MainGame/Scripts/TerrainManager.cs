@@ -64,11 +64,9 @@ public class TerrainManager : MonoBehaviour, ISaveable {
 			int xPos = rnd.Next (0, (int)x);
 			int zPos = rnd.Next (0, (int)z);
 			GameObject copy = (GameObject)GameObject.Instantiate(cityObject,new Vector3(xPos, 1000, zPos),Quaternion.identity);
-			SetLayerRecursively (copy, 9);
 			copy.name = "City " + i;
 			City city = copy.GetComponent<City> ();
 			city.cityName = i.ToString();
-			city.cityMenuObject = cityMenuObject;
 			city.Offices = GenerateOffices (city);
 			AlignWithGround (city);
 		}

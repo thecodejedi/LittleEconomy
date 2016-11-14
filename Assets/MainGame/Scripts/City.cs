@@ -16,14 +16,8 @@ public class City : MonoBehaviour, ISaveable {
 
 	public GameObject texture;
 
-	public GameObject cityMenuObject;
-
-	CityMenu cityMenu;
-
 	// Use this for initialization
 	void Start () {
-		cityMenu = cityMenuObject.GetComponent<CityMenu>();
-		text = text.GetComponent<Text> ();
 		text.text = cityName;
 	}
 
@@ -34,6 +28,7 @@ public class City : MonoBehaviour, ISaveable {
 
 	void OnMouseDown() {
 		Debug.LogWarning ("City " + cityName + " clicked");
+		CityMenu cityMenu = GameObject.Find("CityMenuCanvas").GetComponent<CityMenu>();
 		cityMenu.Open (this);
 	}
 }

@@ -19,6 +19,7 @@ public class GameObjectData
 		lock(typeof(GameObjectData))
 			this.Id = id++;
 		Attributes = new Dictionary<string, object>();
+		Floats = new Dictionary<string, float[,]>();
 		Links = new Dictionary<string, List<int>>();
 	}
 
@@ -26,6 +27,8 @@ public class GameObjectData
 
 
 	public Dictionary<string, object> Attributes { get; set; } 
+
+	public Dictionary<string, float[,]> Floats { get; set; }
 
 	public Dictionary<string, List<int>> Links { get; set; }
 
