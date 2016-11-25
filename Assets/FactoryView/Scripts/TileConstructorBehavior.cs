@@ -1,32 +1,56 @@
-﻿using UnityEngine;
-using System.Collections;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
+
+using UnityEngine;
 
 public class TileConstructorBehavior : MonoBehaviour, IMouseEventReceiver {
+    #region Fields
 
-    // Use this for initialization
-    private void Start()
-    {
-        rend = GetComponentsInChildren<Renderer>();
+    public Factory ContentFactory;
 
-        SetupMenu();
+    public GameObject EmptyPrefab;
 
-        empty = Instantiate(EmptyPrefab);
-        empty.transform.parent = transform;
+    public SelectionProvider MenuPrefab;
 
-        empty.transform.localPosition = empty.transform.position + gameObject.transform.FindChild("Center").transform.localPosition;
-        empty.SetActive(true);
+    private GameObject empty;
+
+    private SelectionProvider menu;
+
+    #endregion
+
+    #region Public Properties
+
+    public GameObject ActiveComponent { get; private set; }
+
+    public GameObject HitPane {
+        get {
+            return gameObject.transform.FindChild("HitPane").gameObject;
+        }
     }
 
-    private void SetupMenu() {
-        menu = Instantiate(MenuPrefab);
-        menu.transform.parent = transform;
-        ContentFactory.AllEntries.Select(item => new SelectionOption(item, this))
-                      .ToList()
-                      .ForEach(item => menu.AddSelection(item));
-        menu.gameObject.SetActive(false);
+    #endregion
+
+    #region Properties
+
+    private GameObject Empty {
+        get {
+            return empty ?? (empty = CreateEmpty());
+        }
+    }
+
+    private SelectionProvider Menu {
+        get {
+            return menu ?? (menu = CreateMenu());
+        }
+    }
+
+    #endregion
+
+    #region Public Methods and Operators
+
+    public void MouseDown() {
+        print("OpenMenu");
+        Menu.OpenSelection();
+        SwitchToMenuOpenState();
     }
 
     public void MouseEnter() {
@@ -38,34 +62,72 @@ public class TileConstructorBehavior : MonoBehaviour, IMouseEventReceiver {
     public void MouseOver() {
     }
 
-    public void MouseDown() {
-        print("clicked");
-        menu.OpenSelection();
+    public void Select(string componentName) {
+        print("building " + componentName + "...");
+
+        BuildComponent(componentName);
+        SwitchToBuiltState();
     }
 
-    public GameObject EmptyPrefab;
+    #endregion
 
-    public Factory ContentFactory;
+    #region Methods
 
-    public SelectionProvider MenuPrefab;
-
-    private Renderer[] rend;
-    private SelectionProvider menu;
-    private GameObject empty;
-
-    private void Build(string factoryName)
-    {
-        print("building Factory");
-
-        GameObject component = ContentFactory.Create(factoryName);
-
-        component.transform.parent = transform;
-        component.transform.localPosition = component.transform.position + gameObject.transform.FindChild("Center").transform.localPosition;
-        empty.SetActive(false);
-        gameObject.transform.FindChild("HitPane").gameObject.SetActive(false);
+    private void BuildComponent(string text) {
+        ActiveComponent = ContentFactory.Create(text, transform);
+        CenterComponent(ActiveComponent);
     }
 
-    public void Select(string text) {
-        print(text);
+    private void CenterComponent(GameObject component) {
+        component.transform.localPosition = component.transform.localPosition
+                                            + gameObject.transform.FindChild("Center").transform.localPosition;
     }
+
+    private GameObject CreateEmpty() {
+        GameObject obj = (GameObject)Instantiate(EmptyPrefab, transform, false);
+        CenterComponent(obj);
+        return obj;
+    }
+
+    private SelectionProvider CreateMenu() {
+        SelectionProvider selectionMenu = (SelectionProvider)Instantiate(MenuPrefab, transform, false);
+        ContentFactory.AllEntries.Select(item => new SelectionOption(item, this))
+                      .ToList()
+                      .ForEach(item => selectionMenu.AddSelection(item));
+        return selectionMenu;
+    }
+
+    // Use this for initialization
+    private void Start() {
+        SwitchToEmptyState();
+    }
+
+    private void SwitchToBuiltState() {
+        UpdateState(false, false, true, false);
+    }
+
+    private void SwitchToEmptyState() {
+        UpdateState(true, true, false, false);
+    }
+
+    private void SwitchToMenuOpenState() {
+        UpdateState(false, false, false, true);
+    }
+
+    private void UpdateState(bool emptyState, bool hitPaneState, bool activeComponentState, bool menuState) {
+        if (Empty != null) {
+            Empty.SetActive(emptyState);
+        }
+        if (HitPane != null) {
+            HitPane.SetActive(hitPaneState);
+        }
+        if (ActiveComponent != null) {
+            ActiveComponent.SetActive(activeComponentState);
+        }
+        if (Menu != null) {
+            Menu.gameObject.SetActive(menuState);
+        }
+    }
+
+    #endregion
 }

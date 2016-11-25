@@ -17,8 +17,8 @@ public class Factory : MonoBehaviour {
 
     #region Public Methods and Operators
 
-    public GameObject Create(string childName) {
-        return Instantiate(transform.FindChild(childName).gameObject);
+    public GameObject Create(string childName, Transform parent) {
+        return (GameObject)Instantiate(transform.FindChild(childName).gameObject, parent, false);
     }
 
     #endregion

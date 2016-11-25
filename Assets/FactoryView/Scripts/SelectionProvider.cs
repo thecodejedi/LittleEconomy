@@ -13,21 +13,20 @@ public class SelectionProvider : MonoBehaviour {
 
     public void OpenSelection() {
         options.ForEach(CreateMenuEntry);
-        gameObject.SetActive(true);
     }
 
-    private void CreateMenuEntry(SelectionOption option)
-    {
-        var panel = transform.FindChild("Canvas").FindChild("Panel");
-        var button = panel.GetChild(panel.childCount - 1);
-        var duplicateButton = Instantiate(button);
-        duplicateButton.transform.parent = panel;
+    private void CreateMenuEntry(SelectionOption option) {
+        Transform panel = transform.FindChild("Canvas").FindChild("Panel");
+        Transform button = panel.GetChild(panel.childCount - 1);
+        Transform duplicateButton = (Transform)Instantiate(button, panel, false);
         duplicateButton.gameObject.SetActive(true);
         duplicateButton.GetComponentInChildren<Text>().text = option.Text;
 
-        var rectTransform = duplicateButton.GetComponent<RectTransform>();
-        rectTransform.position = new Vector3(rectTransform.position.x, rectTransform.position.y + rectTransform.rect.height, rectTransform.position.z);
+        RectTransform rectTransform = duplicateButton.GetComponent<RectTransform>();
+        Vector3 position = duplicateButton.localPosition;
+        position.y -= rectTransform.rect.height;
+        duplicateButton.localPosition = position;
 
-        duplicateButton.GetComponent<Button>().onClick.AddListener(() => { option.Selected(); });
+        duplicateButton.GetComponent<Button>().onClick.AddListener(option.Selected);
     }
 }

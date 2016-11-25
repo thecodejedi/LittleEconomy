@@ -2,16 +2,16 @@
 
 public class SelectionOption
 {
-    public TileConstructorBehavior Parent { get; private set; }
+    public TileConstructorBehavior TileConstructor { get; private set; }
 
-    public SelectionOption(string text, TileConstructorBehavior parent) {
-        Parent = parent;
+    public SelectionOption(string text, TileConstructorBehavior tileConstructor) {
+        TileConstructor = tileConstructor;
         Text = text;
     }
 
     public string Text { get; set; }
 
     public void Selected() {
-        Parent.Select(Text);
+        TileConstructor.Select(Text);
     }
 }
